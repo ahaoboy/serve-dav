@@ -1,0 +1,15 @@
+[package]
+name = "serve-dav"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+dav-server = { path = "C:/tool/wt/dav-server-rs", features = ["all"] }
+# dav-server = {version = "*" ,features = ["all"] }
+http = "0.2.9"
+actix-cors = "0.6.4"
+actix-web = "4.3.1"
+tokio = { version = "1.31.0", features = ["full"] }
+clap = { version = "4.4.0", features = ["derive"] }
