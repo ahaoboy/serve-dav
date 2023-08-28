@@ -5,7 +5,7 @@ use actix_web::{web, App, HttpServer};
 use clap::Parser;
 use dav_server::actix::*;
 use std::io;
-use tokio;
+
 
 use dav_server::{fakels::FakeLs, localfs::LocalFs, DavConfig, DavHandler};
 
@@ -67,13 +67,13 @@ pub(crate) fn get_server(cli: Cli) -> io::Result<Server> {
 
     println!("serve-dav: http://{} , user:{} , pwd: {}", addr, user, pwd);
 
-    return Ok(HttpServer::new(move || {
+    Ok(HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(dav_server.clone()))
             .service(web::resource("/{tail:.*}").to(dav_handler))
     })
     .bind(addr)?
-    .run());
+    .run())
 }
 
 #[tokio::main]
