@@ -37,7 +37,7 @@ pub(crate) struct Cli {
 }
 
 pub(crate) fn get_server(cli: Cli) -> io::Result<Server> {
-    println!("input args: {:?}", cli);
+    // println!("input args: {:?}", cli);
     let Cli {
         file_or_dir,
         pwd,
@@ -65,7 +65,7 @@ pub(crate) fn get_server(cli: Cli) -> io::Result<Server> {
     let ip = "0.0.0.0";
     let addr = format!("{}:{}", ip, port);
 
-    println!("serve-dav: http://{} , user:{} , pwd: {}", addr, user, pwd);
+    println!("serve-dav: http://{}", addr);
 
     Ok(HttpServer::new(move || {
         App::new()
