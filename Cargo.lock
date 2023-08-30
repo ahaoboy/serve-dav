@@ -514,6 +514,7 @@ dependencies = [
 [[package]]
 name = "dav-server"
 version = "0.5.7"
+source = "git+https://github.com/ahaoboy/dav-server-rs#6fc317373c753b6e25d29d1b373e95971137729e"
 dependencies = [
  "actix-web",
  "bytes",
