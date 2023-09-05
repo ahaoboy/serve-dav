@@ -6,7 +6,6 @@ use clap::Parser;
 use dav_server::actix::*;
 use std::io;
 
-
 use dav_server::{fakels::FakeLs, localfs::LocalFs, DavConfig, DavHandler};
 
 pub async fn dav_handler(req: DavRequest, davhandler: web::Data<DavHandler>) -> DavResponse {
@@ -33,6 +32,7 @@ pub(crate) struct Cli {
     #[arg(long, default_value_t = 9423)]
     port: u32,
 
+    #[clap(default_value_t = String::from("."))]
     file_or_dir: String,
 }
 
@@ -54,7 +54,6 @@ pub(crate) fn get_server(cli: Cli) -> io::Result<Server> {
         let parent = path.parent().unwrap();
         let name = path.file_name().unwrap().to_string_lossy().to_string();
         LocalFs::new_with_includes(parent, false, false, false, vec![name])
-
     };
 
     let dav_server = DavHandler::builder()
