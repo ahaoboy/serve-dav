@@ -29,20 +29,25 @@ pub(crate) struct Cli {
     pwd: String,
 
     /// port
-    #[arg(long, default_value_t = 9423)]
+    #[arg(long, default_value_t = 9421)]
     port: u32,
 
     #[clap(default_value_t = String::from("."))]
     file_or_dir: String,
 }
 
-const TMP: &'static str = "./__tmp__";
+const TMP: &'static str = "__dav_tmp__";
+use std::env;
 
+fn get_tmp_dir() -> PathBuf {
+    let temp_dir: PathBuf = env::temp_dir();
+    temp_dir.join(TMP)
+}
 fn init_dir(tmp_dir: &PathBuf, p: &PathBuf) {
     if tmp_dir.exists() {
-        std::fs::remove_dir_all(TMP).unwrap();
+        std::fs::remove_dir_all(tmp_dir).unwrap();
     }
-
+    // println!("tmp_dir: {:?}",tmp_dir);
     std::fs::create_dir(tmp_dir).unwrap();
     let link_path = tmp_dir.join(p.file_name().unwrap());
     std::os::windows::fs::symlink_file(p, link_path).unwrap();
@@ -63,9 +68,9 @@ pub(crate) fn get_server(cli: Cli) -> io::Result<Server> {
     let fs = if path.is_dir() {
         LocalFs::new(path, false, false, false)
     } else {
-        let tmp_path = std::path::Path::new(TMP);
-        let tmp_path = std::path::absolute(tmp_path).unwrap();
+        let tmp_path = get_tmp_dir();
         init_dir(&tmp_path, &path);
+        // println!("tmp_dir: {:?}", tmp_path);
         LocalFs::new(tmp_path, false, false, false)
     };
 
