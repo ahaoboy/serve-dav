@@ -514,7 +514,8 @@ dependencies = [
 [[package]]
 name = "dav-server"
 version = "0.5.7"
-source = "git+https://github.com/ahaoboy/dav-server-rs#6fc317373c753b6e25d29d1b373e95971137729e"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b1c1b3c57ea8b45dc1303de4653b12e3a2742ff023a469083716feea98abfdbe"
 dependencies = [
  "actix-web",
  "bytes",

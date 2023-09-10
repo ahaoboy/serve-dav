@@ -4,9 +4,9 @@ use actix_web::dev::Server;
 use actix_web::{web, App, HttpServer};
 use clap::Parser;
 use dav_server::actix::*;
-use std::io;
-
 use dav_server::{fakels::FakeLs, localfs::LocalFs, DavConfig, DavHandler};
+use std::io;
+use std::path::PathBuf;
 
 pub async fn dav_handler(req: DavRequest, davhandler: web::Data<DavHandler>) -> DavResponse {
     if let Some(prefix) = req.prefix() {
@@ -36,6 +36,18 @@ pub(crate) struct Cli {
     file_or_dir: String,
 }
 
+const TMP: &'static str = "./__tmp__";
+
+fn init_dir(tmp_dir: &PathBuf, p: &PathBuf) {
+    if tmp_dir.exists() {
+        std::fs::remove_dir_all(TMP).unwrap();
+    }
+
+    std::fs::create_dir(tmp_dir).unwrap();
+    let link_path = tmp_dir.join(p.file_name().unwrap());
+    std::os::windows::fs::symlink_file(p, link_path).unwrap();
+}
+
 pub(crate) fn get_server(cli: Cli) -> io::Result<Server> {
     // println!("input args: {:?}", cli);
     let Cli {
@@ -51,14 +63,15 @@ pub(crate) fn get_server(cli: Cli) -> io::Result<Server> {
     let fs = if path.is_dir() {
         LocalFs::new(path, false, false, false)
     } else {
-        let parent = path.parent().unwrap();
-        let name = path.file_name().unwrap().to_string_lossy().to_string();
-        LocalFs::new_with_includes(parent, false, false, false, vec![name])
+        let tmp_path = std::path::Path::new(TMP);
+        let tmp_path = std::path::absolute(tmp_path).unwrap();
+        init_dir(&tmp_path, &path);
+        LocalFs::new(tmp_path, false, false, false)
     };
 
     let dav_server = DavHandler::builder()
+        .hide_symlinks(false)
         .filesystem(fs)
-        .locksystem(FakeLs::new())
         .build_handler();
 
     let ip = "0.0.0.0";
