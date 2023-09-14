@@ -32,15 +32,19 @@ pub(crate) struct Cli {
     #[arg(long, default_value_t = 9421)]
     port: u32,
 
+    /// host
+    #[arg(long, default_value_t = String::from("0.0.0.0"))]
+    host: String,
+
     #[clap(default_value_t = String::from("."))]
     file_or_dir: String,
 }
 
 const TMP: &'static str = "__dav_tmp__";
-use std::env;
 
 fn get_tmp_dir() -> PathBuf {
-    let temp_dir: PathBuf = env::temp_dir();
+    let exe = std::env::current_exe().unwrap();
+    let temp_dir = exe.parent().unwrap();
     temp_dir.join(TMP)
 }
 fn init_dir(tmp_dir: &PathBuf, p: &PathBuf) {
@@ -60,6 +64,7 @@ pub(crate) fn get_server(cli: Cli) -> io::Result<Server> {
         pwd,
         port,
         user,
+        host,
     } = cli;
 
     let path = std::path::Path::new(&file_or_dir);
@@ -79,10 +84,13 @@ pub(crate) fn get_server(cli: Cli) -> io::Result<Server> {
         .filesystem(fs)
         .build_handler();
 
-    let ip = "0.0.0.0";
-    let addr = format!("{}:{}", ip, port);
+    let addr = format!("{}:{}", host, port);
 
-    println!("serve-dav: http://{}", addr);
+    let local_ip = local_ip_address::local_ip().unwrap();
+    println!("serve-dav:");
+    println!("http://{}:{}/", "localhost", port);
+    println!("http://{}:{}/", local_ip, port);
+    println!("http://{}:{}/", host, port);
 
     Ok(HttpServer::new(move || {
         App::new()
