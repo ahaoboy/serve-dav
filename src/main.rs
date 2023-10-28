@@ -30,7 +30,7 @@ pub(crate) struct Cli {
 
     /// port
     #[arg(long, default_value_t = 9421)]
-    port: u32,
+    port: u16,
 
     /// host
     #[arg(long, default_value_t = String::from("0.0.0.0"))]
@@ -66,8 +66,9 @@ pub(crate) fn get_server(cli: Cli) -> io::Result<Server> {
     } = cli;
 
     let path = std::path::Path::new(&file_or_dir);
+    let port = find_port::find_port("127.0.0.1", port).expect("");
 
-    if !path.exists(){
+    if !path.exists() {
         panic!("file_or_dir not found: {}", path.to_string_lossy());
     }
 
