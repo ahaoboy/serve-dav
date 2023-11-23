@@ -7,7 +7,10 @@ use dav_server::actix::*;
 use dav_server::{localfs::LocalFs, DavConfig, DavHandler};
 use std::io;
 use std::path::PathBuf;
-
+use fast_qr::{
+    convert::{Builder, Shape},
+    ModuleType, QRBuilder, Version, ECL,
+};
 pub async fn dav_handler(req: DavRequest, davhandler: web::Data<DavHandler>) -> DavResponse {
     if let Some(prefix) = req.prefix() {
         let config = DavConfig::new().strip_prefix(prefix);
@@ -90,10 +93,14 @@ pub(crate) fn get_server(cli: Cli) -> io::Result<Server> {
     let addr = format!("{}:{}", host, port);
 
     let local_ip = local_ip_address::local_ip().unwrap();
-    println!("serve-dav:");
-    println!("http://localhost:{}/", port);
-    println!("http://{}:{}/", local_ip, port);
-    println!("http://{}:{}/", host, port);
+
+    let s1 = format!("http://{}:{}/", "localhost", port);
+    let s2 = format!("http://{}:{}/", local_ip, port);
+    let s3 = format!("http://{}:{}/", host, port);
+
+    println!("serve-dav:\n{}\n{}\n{}", s1, s2, s3);
+    let qrcode = QRBuilder::new(s2).ecl(ECL::H).build().unwrap();
+    qrcode.print();
 
     Ok(HttpServer::new(move || {
         App::new()
