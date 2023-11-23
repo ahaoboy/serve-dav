@@ -5,12 +5,12 @@ use actix_web::{web, App, HttpServer};
 use clap::Parser;
 use dav_server::actix::*;
 use dav_server::{localfs::LocalFs, DavConfig, DavHandler};
-use std::io;
-use std::path::PathBuf;
 use fast_qr::{
     convert::{Builder, Shape},
     ModuleType, QRBuilder, Version, ECL,
 };
+use std::io;
+use std::path::PathBuf;
 pub async fn dav_handler(req: DavRequest, davhandler: web::Data<DavHandler>) -> DavResponse {
     if let Some(prefix) = req.prefix() {
         let config = DavConfig::new().strip_prefix(prefix);
