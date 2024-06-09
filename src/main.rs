@@ -1,14 +1,9 @@
-#![feature(absolute_path)]
-
 use actix_web::dev::Server;
 use actix_web::{web, App, HttpServer};
 use clap::Parser;
 use dav_server::actix::*;
 use dav_server::{localfs::LocalFs, DavConfig, DavHandler};
-use fast_qr::{
-    convert::{Builder, Shape},
-    ModuleType, QRBuilder, Version, ECL,
-};
+use fast_qr::{QRBuilder, ECL};
 use std::io;
 use std::path::PathBuf;
 pub async fn dav_handler(req: DavRequest, davhandler: web::Data<DavHandler>) -> DavResponse {
@@ -50,13 +45,19 @@ fn get_tmp_dir() -> PathBuf {
     let temp_dir = exe.parent().unwrap();
     temp_dir.join(TMP)
 }
+
 fn init_dir(tmp_dir: &PathBuf, p: &PathBuf) {
     if tmp_dir.exists() {
         std::fs::remove_dir_all(tmp_dir).unwrap();
     }
     std::fs::create_dir(tmp_dir).unwrap();
     let link_path = tmp_dir.join(p.file_name().unwrap());
+
+    #[cfg(windows)]
     std::os::windows::fs::symlink_file(p, link_path).unwrap();
+
+    #[cfg(unix)]
+    std::os::unix::fs::symlink(p, link_path).unwrap();
 }
 
 pub(crate) fn get_server(cli: Cli) -> io::Result<Server> {
@@ -75,7 +76,7 @@ pub(crate) fn get_server(cli: Cli) -> io::Result<Server> {
         panic!("file_or_dir not found: {}", path.to_string_lossy());
     }
 
-    let path = std::path::absolute(path).unwrap();
+    let path = path.canonicalize().unwrap();
 
     let fs = if path.is_dir() {
         LocalFs::new(path, false, false, false)
