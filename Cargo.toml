@@ -1,19 +1,45 @@
 [package]
 name = "serve-dav"
-version = "0.1.7"
+version = "0.1.8"
 edition = "2021"
 description = "serve-dav"
 license = "MIT"
+repository="https://github.com/ahaoboy/serve-dav"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 # dav-server = { git = "https://github.com/ahaoboy/dav-server-rs", features = ["all"] }
-dav-server = { version = "0.5.7", features = ["actix-compat"] }
-http = "0.2.9"
-actix-cors = "0.6.4"
-actix-web = "4.3.1"
-tokio = { version = "1.31.0", features = ["full"] }
-clap = { version = "4.4.0", features = ["derive"] }
-local-ip-address= {version = "0.5.5" }
-fast_qr = "0.10.4"
+dav-server = { version = "0.5.8", features = ["actix-compat"] }
+actix-cors = "0.7.0"
+actix-web = "4.7.0"
+tokio = { version = "1.38.0", features = ["full"] }
+clap = { version = "4.5.6", features = ["derive"] }
+local-ip-address= {version = "0.6.1" }
+fast_qr = "0.12.5"
 find_port = "0.1.0"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = "symbols"
+
+# The profile that 'cargo dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"
+
+# Config for 'cargo dist'
+[workspace.metadata.dist]
+# The preferred cargo-dist version to use in CI (Cargo.toml SemVer syntax)
+cargo-dist-version = "0.15.1"
+# CI backends to support
+ci = "github"
+# The installers to generate for each app
+installers = []
+# Target platforms to build apps for (Rust target-triple syntax)
+targets = ["x86_64-apple-darwin", "x86_64-unknown-linux-gnu", "x86_64-pc-windows-msvc"]
+# Publish jobs to run in CI
+pr-run-mode = "plan"

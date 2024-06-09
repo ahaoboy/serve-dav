@@ -1,14 +1,9 @@
-#![feature(absolute_path)]
-
 use actix_web::dev::Server;
 use actix_web::{web, App, HttpServer};
 use clap::Parser;
 use dav_server::actix::*;
 use dav_server::{localfs::LocalFs, DavConfig, DavHandler};
-use fast_qr::{
-    convert::{Builder, Shape},
-    ModuleType, QRBuilder, Version, ECL,
-};
+use fast_qr::{QRBuilder, ECL};
 use std::io;
 use std::path::PathBuf;
 pub async fn dav_handler(req: DavRequest, davhandler: web::Data<DavHandler>) -> DavResponse {
@@ -75,7 +70,7 @@ pub(crate) fn get_server(cli: Cli) -> io::Result<Server> {
         panic!("file_or_dir not found: {}", path.to_string_lossy());
     }
 
-    let path = std::path::absolute(path).unwrap();
+    let path = path.canonicalize().unwrap();
 
     let fs = if path.is_dir() {
         LocalFs::new(path, false, false, false)
